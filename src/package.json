@@ -1,0 +1,13 @@
+{
+  "name": "com.longbombus.urid",
+  "version": "0.1.0",
+  "displayName": "URID",
+  "description": "Allocation-free bijective base-37 string identifiers packed into 64/128/192/256-bit value types.",
+  "unity": "2021.3",
+  "keywords": [
+    "id",
+    "identifier",
+    "string",
+    "burst"
+  ]
+}

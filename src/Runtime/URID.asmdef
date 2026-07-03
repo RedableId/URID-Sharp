@@ -1,0 +1,22 @@
+{
+    "name": "URID",
+    "rootNamespace": "URID",
+    "references": [
+        "Unity.Burst"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "URID_BURST"
+        }
+    ],
+    "noEngineReferences": false
+}

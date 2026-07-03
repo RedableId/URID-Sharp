@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="URID.csproj" />
+  <Project Path="URID.Tests.csproj" />
+</Solution>

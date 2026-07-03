@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
+    <!-- Pinned to C# 9 so anything Unity can't compile fails here too. -->
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>URID</RootNamespace>
+    <AssemblyName>URID</AssemblyName>
+    <!-- The project sits at the repo root: without this the SDK would glob
+         every .cs in the repo, including src/Tests and tests/. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Urid</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Long Bombus</Authors>
+    <Description>Allocation-free bijective base-37 string identifiers packed into 64/128/192/256-bit value types.</Description>
+    <PackageTags>id;identifier;string;interning</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/longbombus/URID-Sharp</RepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <!-- Source of truth is the UPM package folder (src/); this project just links it. -->
+  <ItemGroup>
+    <Compile Include="src\Runtime\**\*.cs" LinkBase="Runtime" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

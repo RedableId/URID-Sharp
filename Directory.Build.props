@@ -1,0 +1,11 @@
+<Project>
+
+  <!-- Standard .NET artifacts output layout: all bin/obj go to
+       artifacts/{bin,obj}/<ProjectName>/ instead of per-project folders.
+       Required for the two csproj sharing the repo root: without it their
+       obj/ folders (NuGet restore assets) would collide. -->
+  <PropertyGroup>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+  </PropertyGroup>
+
+</Project>
