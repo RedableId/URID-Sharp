@@ -1,10 +1,11 @@
+using System;
 using System.Runtime.CompilerServices;
 
 namespace URID
 {
     // ── internal interface ────────────────────────────────────────────────────
     // All methods mutate the receiver in place. Callers pass VecN by value to
-    // generic helpers (Base37) so the originals are never modified.
+    // generic helpers (UridUtility) so the originals are never modified.
     // ──────────────────────────────────────────────────────────────────────────
 
     // Constant-multiplier helpers for ×37 / ÷37 on individual 64-bit words.
@@ -62,6 +63,19 @@ namespace URID
         }
     }
 
+    // Deterministic hash mixing. Deliberately not System.HashCode: its per-process
+    // random seed is not Burst-compatible, and Urid keys must hash inside jobs.
+    internal static class HashMix
+    {
+        private const ulong K = 0x9E3779B97F4A7C15UL;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static ulong Add(ulong h, ulong word) => (h ^ word) * K;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int Fold(ulong h) => (int)h ^ (int)(h >> 32);
+    }
+
     internal interface IVec
     {
         bool IsZero { get; }
@@ -70,14 +84,18 @@ namespace URID
         void Mul37Add(ulong addend); // multiply by 37 and add addend in place
     }
 
+    // Fields are public on these internal types so Unity's serializer picks them
+    // up without [SerializeField]; renaming them breaks serialized assets.
+
     // ──────────────────────────────────────────────────────────────────────────
     //  Vec64  –  1 word, up to 12 symbols
     //  No UInt128 needed: 37^12 ≈ 6.58×10^18 < 2^64, so all intermediate
     //  values fit in a single ulong.
     // ──────────────────────────────────────────────────────────────────────────
-    internal struct Vec64 : IVec
+    [Serializable]
+    internal struct Vec64 : IVec, IEquatable<Vec64>
     {
-        internal ulong V0;
+        public ulong V0;
         public readonly bool IsZero => V0 == 0;
 
         internal Vec64(ulong v0) => V0 = v0;
@@ -90,17 +108,23 @@ namespace URID
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Mul37Add(ulong addend) => V0 = V0 * 37u + addend;
+
+        public readonly bool Equals(Vec64 o) => V0 == o.V0;
+        public readonly override bool Equals(object? obj) => obj is Vec64 o && Equals(o);
+        public readonly override int GetHashCode() => HashMix.Fold(V0);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
     //  Vec128  –  2 words, up to 24 symbols
     // ──────────────────────────────────────────────────────────────────────────
-    internal struct Vec128 : IVec
+    [Serializable]
+    internal struct Vec128 : IVec, IEquatable<Vec128>
     {
-        internal ulong V0, V1;
+        public ulong V0, V1;
         public readonly bool IsZero => V0 == 0 && V1 == 0;
 
         internal Vec128(ulong v0, ulong v1) => (V0, V1) = (v0, v1);
+        internal Vec128(Vec64 v) => (V0, V1) = (v.V0, 0UL);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SubOne()
@@ -125,17 +149,25 @@ namespace URID
             if (carry == 0) return;
             Magic37.MulStep(ref V1, ref carry);
         }
+
+        public readonly bool Equals(Vec128 o) => V0 == o.V0 && V1 == o.V1;
+        public readonly override bool Equals(object? obj) => obj is Vec128 o && Equals(o);
+        public readonly override int GetHashCode() =>
+            HashMix.Fold(HashMix.Add(HashMix.Add(0, V0), V1));
     }
 
     // ──────────────────────────────────────────────────────────────────────────
     //  Vec192  –  3 words, up to 36 symbols
     // ──────────────────────────────────────────────────────────────────────────
-    internal struct Vec192 : IVec
+    [Serializable]
+    internal struct Vec192 : IVec, IEquatable<Vec192>
     {
-        internal ulong V0, V1, V2;
+        public ulong V0, V1, V2;
         public readonly bool IsZero => V0 == 0 && V1 == 0 && V2 == 0;
 
         internal Vec192(ulong v0, ulong v1, ulong v2) => (V0, V1, V2) = (v0, v1, v2);
+        internal Vec192(Vec64 v)  => (V0, V1, V2) = (v.V0, 0UL, 0UL);
+        internal Vec192(Vec128 v) => (V0, V1, V2) = (v.V0, v.V1, 0UL);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SubOne()
@@ -165,17 +197,26 @@ namespace URID
             if (carry == 0) return;
             Magic37.MulStep(ref V2, ref carry);
         }
+
+        public readonly bool Equals(Vec192 o) => V0 == o.V0 && V1 == o.V1 && V2 == o.V2;
+        public readonly override bool Equals(object? obj) => obj is Vec192 o && Equals(o);
+        public readonly override int GetHashCode() =>
+            HashMix.Fold(HashMix.Add(HashMix.Add(HashMix.Add(0, V0), V1), V2));
     }
 
     // ──────────────────────────────────────────────────────────────────────────
     //  Vec256  –  4 words, up to 49 symbols
     // ──────────────────────────────────────────────────────────────────────────
-    internal struct Vec256 : IVec
+    [Serializable]
+    internal struct Vec256 : IVec, IEquatable<Vec256>
     {
-        internal ulong V0, V1, V2, V3;
+        public ulong V0, V1, V2, V3;
         public readonly bool IsZero => V0 == 0 && V1 == 0 && V2 == 0 && V3 == 0;
 
         internal Vec256(ulong v0, ulong v1, ulong v2, ulong v3) => (V0, V1, V2, V3) = (v0, v1, v2, v3);
+        internal Vec256(Vec64 v)  => (V0, V1, V2, V3) = (v.V0, 0UL, 0UL, 0UL);
+        internal Vec256(Vec128 v) => (V0, V1, V2, V3) = (v.V0, v.V1, 0UL, 0UL);
+        internal Vec256(Vec192 v) => (V0, V1, V2, V3) = (v.V0, v.V1, v.V2, 0UL);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SubOne()
@@ -210,5 +251,9 @@ namespace URID
             if (carry == 0) return;
             Magic37.MulStep(ref V3, ref carry);
         }
+
+        public readonly bool Equals(Vec256 o) => V0 == o.V0 && V1 == o.V1 && V2 == o.V2 && V3 == o.V3;
+        public readonly override bool Equals(object? obj) => obj is Vec256 o && Equals(o);
+        public readonly override int GetHashCode() =>  HashMix.Fold(HashMix.Add(HashMix.Add(HashMix.Add(HashMix.Add(0, V0), V1), V2), V3));
     }
 }

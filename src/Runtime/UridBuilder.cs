@@ -67,31 +67,31 @@ namespace URID
         public Urid64 To64()
         {
             const int cap = Urid64.MaxLength;
-            if (_length <= cap) return new Urid64(_v.V0);
+            if (_length <= cap) return new Urid64(new Vec64(_v.V0));
             Span<char> buf = stackalloc char[Urid256.MaxLength];
-            Base37.DecodeChars(_v, buf);
+            _v.WriteChars(buf);
             return new Urid64(buf.Slice(0, cap));
         }
 
         public Urid128 To128()
         {
             const int cap = Urid128.MaxLength;
-            if (_length <= cap) return new Urid128(_v.V0, _v.V1);
+            if (_length <= cap) return new Urid128(new Vec128(_v.V0, _v.V1));
             Span<char> buf = stackalloc char[Urid256.MaxLength];
-            Base37.DecodeChars(_v, buf);
+            _v.WriteChars(buf);
             return new Urid128(buf.Slice(0, cap));
         }
 
         public Urid192 To192()
         {
             const int cap = Urid192.MaxLength;
-            if (_length <= cap) return new Urid192(_v.V0, _v.V1, _v.V2);
+            if (_length <= cap) return new Urid192(new Vec192(_v.V0, _v.V1, _v.V2));
             Span<char> buf = stackalloc char[Urid256.MaxLength];
-            Base37.DecodeChars(_v, buf);
+            _v.WriteChars(buf);
             return new Urid192(buf.Slice(0, cap));
         }
 
         // No truncation ever needed: builder capacity == Urid256.MaxLength.
-        public Urid256 To256() => new Urid256(_v.V0, _v.V1, _v.V2, _v.V3);
+        public Urid256 To256() => new Urid256(_v);
     }
 }
