@@ -28,7 +28,7 @@ namespace URID
 		public const int MaxLength = 12;
 
 		/// <summary>Creates an identifier from its raw words, least significant first.</summary>
-		internal Urid64(ulong v0) => _v0 = v0;
+		internal Urid64(ulong v0) => this.v0 = v0;
 
 		/// <summary>Creates an identifier from a working register.</summary>
 		internal Urid64(Vec64 v) : this(v.V0) { }
@@ -37,7 +37,7 @@ namespace URID
 		public Urid64(ReadOnlySpan<char> src) : this(UridUtility.Parse<Vec64>(src, MaxLength)) { }
 
 		/// <summary>Copy of the value as a mutable working register for <see cref="UridUtility"/>.</summary>
-		internal readonly Vec64 Vec => new Vec64(_v0);
+		internal readonly Vec64 Vec => new Vec64(v0);
 
 		/// <summary>Number of symbols.</summary>
 		/// <remarks>Not stored: it is computed by decoding the value, so the cost grows with the length.</remarks>
@@ -78,13 +78,13 @@ namespace URID
 		public readonly string ToString(bool singleCase, bool upperCase, char separator = Base37.Separator) => Vec.Format(singleCase, upperCase, separator);
 
 		/// <inheritdoc/>
-		public readonly bool Equals(Urid64 other) => _v0 == other._v0;
+		public readonly bool Equals(Urid64 other) => v0 == other.v0;
 
 		/// <inheritdoc/>
 		public readonly override bool Equals(object? obj) => obj is Urid64 o && Equals(o);
 
 		/// <inheritdoc/>
-		public readonly override int GetHashCode() => HashMix.Fold(_v0);
+		public readonly override int GetHashCode() => HashMix.Fold(v0);
 
 		/// <summary>Whether two identifiers are equal.</summary>
 		public static bool operator ==(Urid64 a, Urid64 b) => a.Equals(b);
@@ -106,11 +106,7 @@ namespace URID
 		public const int MaxLength = 24;
 
 		/// <inheritdoc cref="Urid64.Urid64(ulong)"/>
-		internal Urid128(ulong v0, ulong v1)
-		{
-			_v0 = v0;
-			_v1 = v1;
-		}
+		internal Urid128(ulong v0, ulong v1) => (this.v0, this.v1) = (v0, v1);
 
 		/// <inheritdoc cref="Urid64.Urid64(Vec64)"/>
 		internal Urid128(Vec128 v) : this(v.V0, v.V1) { }
@@ -119,7 +115,7 @@ namespace URID
 		public Urid128(ReadOnlySpan<char> src) : this(UridUtility.Parse<Vec128>(src, MaxLength)) { }
 
 		/// <inheritdoc cref="Urid64.Vec"/>
-		internal readonly Vec128 Vec => new Vec128(_v0, _v1);
+		internal readonly Vec128 Vec => new Vec128(v0, v1);
 
 		/// <inheritdoc cref="Urid64.Length"/>
 		public readonly int Length => Vec.GetLength();
@@ -137,13 +133,13 @@ namespace URID
 		public readonly string ToString(bool singleCase, bool upperCase, char separator = Base37.Separator) => Vec.Format(singleCase, upperCase, separator);
 
 		/// <inheritdoc/>
-		public readonly bool Equals(Urid128 other) => _v0 == other._v0 && _v1 == other._v1;
+		public readonly bool Equals(Urid128 other) => v0 == other.v0 && v1 == other.v1;
 
 		/// <inheritdoc/>
 		public readonly override bool Equals(object? obj) => obj is Urid128 o && Equals(o);
 
 		/// <inheritdoc/>
-		public readonly override int GetHashCode() => HashMix.Fold(HashMix.Add(HashMix.Add(0, _v0), _v1));
+		public readonly override int GetHashCode() => HashMix.Fold(HashMix.Add(HashMix.Add(0, v0), v1));
 
 		/// <inheritdoc cref="Urid64.operator ==(Urid64, Urid64)"/>
 		public static bool operator ==(Urid128 a, Urid128 b) => a.Equals(b);
@@ -168,12 +164,7 @@ namespace URID
 		public const int MaxLength = 36;
 
 		/// <inheritdoc cref="Urid64.Urid64(ulong)"/>
-		internal Urid192(ulong v0, ulong v1, ulong v2)
-		{
-			_v0 = v0;
-			_v1 = v1;
-			_v2 = v2;
-		}
+		internal Urid192(ulong v0, ulong v1, ulong v2) => (this.v0, this.v1, this.v2) = (v0, v1, v2);
 
 		/// <inheritdoc cref="Urid64.Urid64(Vec64)"/>
 		internal Urid192(Vec192 v) : this(v.V0, v.V1, v.V2) { }
@@ -182,7 +173,7 @@ namespace URID
 		public Urid192(ReadOnlySpan<char> src) : this(UridUtility.Parse<Vec192>(src, MaxLength)) { }
 
 		/// <inheritdoc cref="Urid64.Vec"/>
-		internal readonly Vec192 Vec => new Vec192(_v0, _v1, _v2);
+		internal readonly Vec192 Vec => new Vec192(v0, v1, v2);
 
 		/// <inheritdoc cref="Urid64.Length"/>
 		public readonly int Length => Vec.GetLength();
@@ -200,13 +191,13 @@ namespace URID
 		public readonly string ToString(bool singleCase, bool upperCase, char separator = Base37.Separator) => Vec.Format(singleCase, upperCase, separator);
 
 		/// <inheritdoc/>
-		public readonly bool Equals(Urid192 other) => _v0 == other._v0 && _v1 == other._v1 && _v2 == other._v2;
+		public readonly bool Equals(Urid192 other) => v0 == other.v0 && v1 == other.v1 && v2 == other.v2;
 
 		/// <inheritdoc/>
 		public readonly override bool Equals(object? obj) => obj is Urid192 o && Equals(o);
 
 		/// <inheritdoc/>
-		public readonly override int GetHashCode() => HashMix.Fold(HashMix.Add(HashMix.Add(HashMix.Add(0, _v0), _v1), _v2));
+		public readonly override int GetHashCode() => HashMix.Fold(HashMix.Add(HashMix.Add(HashMix.Add(0, v0), v1), v2));
 
 		/// <inheritdoc cref="Urid64.operator ==(Urid64, Urid64)"/>
 		public static bool operator ==(Urid192 a, Urid192 b) => a.Equals(b);
@@ -238,13 +229,7 @@ namespace URID
 		public const int MaxLength = 49;
 
 		/// <inheritdoc cref="Urid64.Urid64(ulong)"/>
-		internal Urid256(ulong v0, ulong v1, ulong v2, ulong v3)
-		{
-			_v0 = v0;
-			_v1 = v1;
-			_v2 = v2;
-			_v3 = v3;
-		}
+		internal Urid256(ulong v0, ulong v1, ulong v2, ulong v3) => (this.v0, this.v1, this.v2, this.v3) = (v0, v1, v2, v3);
 
 		/// <inheritdoc cref="Urid64.Urid64(Vec64)"/>
 		internal Urid256(Vec256 v) : this(v.V0, v.V1, v.V2, v.V3) { }
@@ -253,7 +238,7 @@ namespace URID
 		public Urid256(ReadOnlySpan<char> src) : this(UridUtility.Parse<Vec256>(src, MaxLength)) { }
 
 		/// <inheritdoc cref="Urid64.Vec"/>
-		internal readonly Vec256 Vec => new Vec256(_v0, _v1, _v2, _v3);
+		internal readonly Vec256 Vec => new Vec256(v0, v1, v2, v3);
 
 		/// <inheritdoc cref="Urid64.Length"/>
 		public readonly int Length => Vec.GetLength();
@@ -271,13 +256,13 @@ namespace URID
 		public readonly string ToString(bool singleCase, bool upperCase, char separator = Base37.Separator) => Vec.Format(singleCase, upperCase, separator);
 
 		/// <inheritdoc/>
-		public readonly bool Equals(Urid256 other) => _v0 == other._v0 && _v1 == other._v1 && _v2 == other._v2 && _v3 == other._v3;
+		public readonly bool Equals(Urid256 other) => v0 == other.v0 && v1 == other.v1 && v2 == other.v2 && v3 == other.v3;
 
 		/// <inheritdoc/>
 		public readonly override bool Equals(object? obj) => obj is Urid256 o && Equals(o);
 
 		/// <inheritdoc/>
-		public readonly override int GetHashCode() => HashMix.Fold(HashMix.Add(HashMix.Add(HashMix.Add(HashMix.Add(0, _v0), _v1), _v2), _v3));
+		public readonly override int GetHashCode() => HashMix.Fold(HashMix.Add(HashMix.Add(HashMix.Add(HashMix.Add(0, v0), v1), v2), v3));
 
 		/// <inheritdoc cref="Urid64.operator ==(Urid64, Urid64)"/>
 		public static bool operator ==(Urid256 a, Urid256 b) => a.Equals(b);

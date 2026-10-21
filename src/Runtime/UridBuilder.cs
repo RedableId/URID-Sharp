@@ -18,22 +18,22 @@ namespace URID
 	/// </remarks>
 	public ref struct UridBuilder
 	{
-		private Vec256 _v;
-		private int _length;
+		private Vec256 v;
+		private int length;
 
 		/// <summary>Number of symbols appended so far.</summary>
-		public int Length => _length;
+		public int Length => length;
 
 		/// <summary>Whether the builder holds <see cref="Urid256.MaxLength"/> symbols and ignores further appends.</summary>
-		public bool IsFull => _length >= Urid256.MaxLength;
+		public bool IsFull => length >= Urid256.MaxLength;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void AppendCode(uint code)
 		{
-			if (_length < Urid256.MaxLength)
+			if (length < Urid256.MaxLength)
 			{
-				_v.Mul37Add(code);
-				_length++;
+				v.Mul37Add(code);
+				length++;
 			}
 		}
 
@@ -43,7 +43,7 @@ namespace URID
 		/// <summary>Appends every character of <paramref name="token"/> as a symbol.</summary>
 		public void Append(ReadOnlySpan<char> token)
 		{
-			int lim = Math.Min(token.Length, Urid256.MaxLength - _length);
+			int lim = Math.Min(token.Length, Urid256.MaxLength - length);
 			for (int i = 0; i < lim; i++)
 				AppendCode(Base37.Encode(token[i]));
 		}
@@ -80,9 +80,9 @@ namespace URID
 		public Urid64 To64()
 		{
 			const int cap = Urid64.MaxLength;
-			if (_length <= cap) return new Urid64(_v.V0);
+			if (length <= cap) return new Urid64(v.V0);
 			Span<char> buf = stackalloc char[Urid256.MaxLength];
-			_v.WriteChars(buf);
+			v.WriteChars(buf);
 			return new Urid64(buf.Slice(0, cap));
 		}
 
@@ -90,9 +90,9 @@ namespace URID
 		public Urid128 To128()
 		{
 			const int cap = Urid128.MaxLength;
-			if (_length <= cap) return new Urid128(_v.V0, _v.V1);
+			if (length <= cap) return new Urid128(v.V0, v.V1);
 			Span<char> buf = stackalloc char[Urid256.MaxLength];
-			_v.WriteChars(buf);
+			v.WriteChars(buf);
 			return new Urid128(buf.Slice(0, cap));
 		}
 
@@ -100,13 +100,13 @@ namespace URID
 		public Urid192 To192()
 		{
 			const int cap = Urid192.MaxLength;
-			if (_length <= cap) return new Urid192(_v.V0, _v.V1, _v.V2);
+			if (length <= cap) return new Urid192(v.V0, v.V1, v.V2);
 			Span<char> buf = stackalloc char[Urid256.MaxLength];
-			_v.WriteChars(buf);
+			v.WriteChars(buf);
 			return new Urid192(buf.Slice(0, cap));
 		}
 
 		/// <summary>Returns all symbols as a <see cref="Urid256"/>, which always has room for them.</summary>
-		public Urid256 To256() => new Urid256(_v);
+		public Urid256 To256() => new Urid256(v);
 	}
 }
