@@ -1,6 +1,7 @@
 using System;
 using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace URID.Editor
@@ -13,6 +14,11 @@ namespace URID.Editor
 	/// An edit is committed on Enter or when the field loses focus, and the field then shows the stored value:
 	/// lowercased, with other characters turned into the separator and cut to the type's maximum length.
 	/// The tooltip names the type and its maximum length unless the field has its own <c>[Tooltip]</c>.
+	/// </para>
+	/// <para>
+	/// While the field is being edited, the input border turns yellow when at most <see cref="AlmostFullThreshold"/>
+	/// symbols are left and red when the text no longer fits, so the cut on commit does not come as a surprise.
+	/// The border is cleared once the edit is committed or the field loses focus.
 	/// </para>
 	/// <para>
 	/// The drawer reads and writes the serialized fixed buffer <c>v</c> through <see cref="SerializedProperty"/>,
@@ -33,6 +39,12 @@ namespace URID.Editor
 		/// <summary>Name of the serialized fixed buffer in <c>Urid.Unity.cs</c>.</summary>
 		private const string WordsField = "v";
 
+		/// <summary>Number of remaining symbols at which the input border turns yellow.</summary>
+		private const int AlmostFullThreshold = 3;
+
+		private static readonly Color AlmostFullColor = new Color(0.96f, 0.74f, 0.1f);
+		private static readonly Color OverflowColor = new Color(0.87f, 0.22f, 0.22f);
+
 		/// <inheritdoc/>
 		public override VisualElement CreatePropertyGUI(SerializedProperty property)
 		{
@@ -40,21 +52,32 @@ namespace URID.Editor
 			if (words == null || !words.isFixedBuffer)
 				return new Label($"{property.displayName}: unsupported Urid layout");
 
+			int maxLength = MaxLength(words.fixedBufferSize);
 			var field = new TextField(property.displayName)
 			{
 				isDelayed = true,
 				tooltip = string.IsNullOrEmpty(property.tooltip)
-					? $"{property.type}, up to {MaxLength(words.fixedBufferSize)} symbols"
+					? $"{property.type}, up to {maxLength} symbols"
 					: property.tooltip,
 			};
 			field.AddToClassList(BaseField<string>.alignedFieldUssClassName);
+			VisualElement input = field.Q(TextField.textInputUssName);
 			Refresh(field, words);
 
+			field.RegisterCallback<FocusInEvent>(_ =>
+			{
+				if (!field.showMixedValue)
+					UpdateBorder(input, field.text.Length, maxLength);
+			});
+			// A delayed field reports ChangeEvent only on commit; InputEvent follows every keystroke.
+			field.RegisterCallback<InputEvent>(e => UpdateBorder(input, e.newData.Length, maxLength));
+			field.RegisterCallback<FocusOutEvent>(_ => SetBorderColor(input, StyleKeyword.Null));
 			field.RegisterValueChangedCallback(e =>
 			{
 				Write(words, e.newValue);
 				words.serializedObject.ApplyModifiedProperties();
 				Refresh(field, words);
+				SetBorderColor(input, StyleKeyword.Null);
 			});
 			field.TrackPropertyValue(property, _ => Refresh(field, words));
 
@@ -66,6 +89,26 @@ namespace URID.Editor
 		{
 			field.showMixedValue = HasMixedValues(words);
 			field.SetValueWithoutNotify(Read(words));
+		}
+
+		/// <summary>Colors the input border by how many of the <paramref name="maxLength"/> symbols are left.</summary>
+		private static void UpdateBorder(VisualElement input, int length, int maxLength)
+		{
+			if (length > maxLength)
+				SetBorderColor(input, OverflowColor);
+			else if (maxLength - length <= AlmostFullThreshold)
+				SetBorderColor(input, AlmostFullColor);
+			else
+				SetBorderColor(input, StyleKeyword.Null);
+		}
+
+		/// <summary>Sets all four border colors; <see cref="StyleKeyword.Null"/> restores the theme's own colors.</summary>
+		private static void SetBorderColor(VisualElement input, StyleColor color)
+		{
+			input.style.borderTopColor = color;
+			input.style.borderBottomColor = color;
+			input.style.borderLeftColor = color;
+			input.style.borderRightColor = color;
 		}
 
 		/// <summary>Decodes the identifier stored in the serialized words.</summary>
