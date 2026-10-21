@@ -1,7 +1,10 @@
 #if UNITY_5_3_OR_NEWER
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("URID.Editor")]
 
 namespace URID
 {

@@ -28,6 +28,8 @@
 
   <ItemGroup>
     <Compile Include="src\Runtime\**\*.cs" LinkBase="Runtime" />
+    <!-- Unity-only editor code: listed so the IDE shows it, never compiled here. -->
+    <None Include="src\Editor\**\*.cs" LinkBase="Editor" />
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
