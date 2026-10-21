@@ -21,11 +21,11 @@
     <PackageTags>id;identifier;string;interning</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/longbombus/URID-Sharp</RepositoryUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
-  <!-- Source of truth is the UPM package folder (src/); this project just links it. -->
   <ItemGroup>
     <Compile Include="src\Runtime\**\*.cs" LinkBase="Runtime" />
     <None Include="README.md" Pack="true" PackagePath="\" />

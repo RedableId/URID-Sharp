@@ -2,37 +2,55 @@ using System.Runtime.CompilerServices;
 
 namespace URID
 {
-    /// <summary>
-    /// Alphabet of the bijective base-37 encoding.
-    /// Digits are 1–37 (a-z = 1-26, 0-9 = 27-36, separator = 37).
-    /// V = 0 represents the empty identifier; no leading-zero ambiguity.
-    /// All multi-word integers are little-endian (V0 is least significant).
-    /// </summary>
-    internal static class Base37
-    {
-        // ── alphabet layout ──────────────────────────────────────────────────
-        private const uint LettersCount = 26;
-        private const uint DigitsCount  = 10;
-        private const uint DigitsFirst  = LettersCount + 1;
-        private const uint DigitsLast   = LettersCount + DigitsCount;
-        private const uint Base = 37;
+	/// <summary>
+	/// Symbol alphabet of the bijective base-37 numeral system that every Urid is stored in.
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// Symbols map to digit values 1–37: <c>a</c>–<c>z</c> → 1–26, <c>0</c>–<c>9</c> → 27–36, separator → 37.
+	/// There is no digit 0, which makes the system bijective: every symbol string maps to exactly one number
+	/// and back, and the empty string is the number 0. In ordinary base 37, "a" and "0a" would collide.
+	/// </para>
+	/// <para>
+	/// Letters are case-insensitive, and every character that is not an ASCII letter or digit encodes as the separator.
+	/// </para>
+	/// </remarks>
+	internal static class Base37
+	{
+		private const uint LettersCount = 26;
+		private const uint DigitsCount = 10;
+		private const uint DigitsFirst = LettersCount + 1;
+		private const uint DigitsLast = LettersCount + DigitsCount;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static uint Encode(char c)
-        {
-            uint u = (uint)((c | 0x20u) - 'a');
-            if (u < LettersCount) return u + 1;           // 'a'=1 … 'z'=26
-            u = (uint)(c - '0');
-            if (u < DigitsCount)  return u + DigitsFirst; // '0'=27 … '9'=36
-            return Base;                                  // '_' (or anything else) → 37
-        }
+		/// <summary>Digit value of the separator symbol.</summary>
+		internal const uint SeparatorCode = DigitsLast + 1;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static char Decode(uint v)
-        {
-            if (v <= LettersCount) return (char)('a' + v - 1);
-            if (v <= DigitsLast)   return (char)('0' + v - DigitsFirst);
-            return '_';
-        }
-    }
+		/// <summary>Character that the separator symbol decodes to.</summary>
+		internal const char Separator = '_';
+
+		/// <summary>Returns <see langword="true"/> for every character that encodes as the separator.</summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static bool IsSeparator(char c) => Encode(c) == SeparatorCode;
+
+		/// <summary>Returns the digit value (1–37) of a character.</summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static uint Encode(char c)
+		{
+			// Setting bit 0x20 lowercases an ASCII letter and moves no other character into the a–z range.
+			uint u = (uint)((c | 0x20u) - 'a');
+			if (u < LettersCount) return u + 1;
+			u = (uint)(c - '0');
+			if (u < DigitsCount) return u + DigitsFirst;
+			return SeparatorCode;
+		}
+
+		/// <summary>Returns the character for a digit value (1–37). Letters are always lowercase.</summary>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static char Decode(uint v)
+		{
+			if (v <= LettersCount) return (char)('a' + v - 1);
+			if (v <= DigitsLast) return (char)('0' + v - DigitsFirst);
+			return Separator;
+		}
+	}
 }
