@@ -11,6 +11,8 @@
     <!-- The project sits at the repo root: without this the SDK would glob
          every .cs in the repo, including src/Tests and tests/. -->
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <!-- UridSplitEnumerator keeps the decoded symbols in a fixed buffer. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup>

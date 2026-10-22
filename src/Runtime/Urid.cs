@@ -77,6 +77,10 @@ namespace URID
 		/// <exception cref="ArgumentException"><paramref name="separator"/> is an ASCII letter or digit.</exception>
 		public readonly string ToString(bool singleCase, bool upperCase, char separator = Base37.Separator) => Vec.Format(singleCase, upperCase, separator);
 
+		/// <summary>Splits the identifier into the tokens of its top level; see <see cref="UridSplitEnumerator"/>.</summary>
+		/// <param name="options"><see cref="StringSplitOptions.RemoveEmptyEntries"/> skips empty tokens; other options are ignored.</param>
+		public readonly UridSplitEnumerator Split(StringSplitOptions options = StringSplitOptions.None) => UridSplitEnumerator.Create(Vec, options);
+
 		/// <inheritdoc/>
 		public readonly bool Equals(Urid64 other) => v0 == other.v0;
 
@@ -94,6 +98,15 @@ namespace URID
 
 		/// <summary>Parses <paramref name="s"/> like the <see cref="Urid64(ReadOnlySpan{char})"/> constructor.</summary>
 		public static implicit operator Urid64(string s) => new Urid64(s.AsSpan());
+
+		/// <summary>Narrows the identifier, keeping as many leading symbols as fit.</summary>
+		public static explicit operator Urid64(Urid128 src) => new Urid64(src.Vec.KeepFirst(MaxLength).V0);
+
+		/// <inheritdoc cref="explicit operator Urid64(Urid128)"/>
+		public static explicit operator Urid64(Urid192 src) => new Urid64(src.Vec.KeepFirst(MaxLength).V0);
+
+		/// <inheritdoc cref="explicit operator Urid64(Urid128)"/>
+		public static explicit operator Urid64(Urid256 src) => new Urid64(src.Vec.KeepFirst(MaxLength).V0);
 	}
 
 	/// <summary>
@@ -132,6 +145,9 @@ namespace URID
 		/// <inheritdoc cref="Urid64.ToString(bool, bool, char)"/>
 		public readonly string ToString(bool singleCase, bool upperCase, char separator = Base37.Separator) => Vec.Format(singleCase, upperCase, separator);
 
+		/// <inheritdoc cref="Urid64.Split"/>
+		public readonly UridSplitEnumerator Split(StringSplitOptions options = StringSplitOptions.None) => UridSplitEnumerator.Create(Vec, options);
+
 		/// <inheritdoc/>
 		public readonly bool Equals(Urid128 other) => v0 == other.v0 && v1 == other.v1;
 
@@ -152,6 +168,20 @@ namespace URID
 
 		/// <summary>Widens the identifier without changing it.</summary>
 		public static implicit operator Urid128(Urid64 src) => new Urid128(src.Vec.V0, 0UL);
+
+		/// <inheritdoc cref="Urid64.explicit operator Urid64(Urid128)"/>
+		public static explicit operator Urid128(Urid192 src)
+		{
+			var v = src.Vec.KeepFirst(MaxLength);
+			return new Urid128(v.V0, v.V1);
+		}
+
+		/// <inheritdoc cref="Urid64.explicit operator Urid64(Urid128)"/>
+		public static explicit operator Urid128(Urid256 src)
+		{
+			var v = src.Vec.KeepFirst(MaxLength);
+			return new Urid128(v.V0, v.V1);
+		}
 	}
 
 	/// <summary>
@@ -190,6 +220,9 @@ namespace URID
 		/// <inheritdoc cref="Urid64.ToString(bool, bool, char)"/>
 		public readonly string ToString(bool singleCase, bool upperCase, char separator = Base37.Separator) => Vec.Format(singleCase, upperCase, separator);
 
+		/// <inheritdoc cref="Urid64.Split"/>
+		public readonly UridSplitEnumerator Split(StringSplitOptions options = StringSplitOptions.None) => UridSplitEnumerator.Create(Vec, options);
+
 		/// <inheritdoc/>
 		public readonly bool Equals(Urid192 other) => v0 == other.v0 && v1 == other.v1 && v2 == other.v2;
 
@@ -216,6 +249,13 @@ namespace URID
 		{
 			var v = src.Vec;
 			return new Urid192(v.V0, v.V1, 0UL);
+		}
+
+		/// <inheritdoc cref="Urid64.explicit operator Urid64(Urid128)"/>
+		public static explicit operator Urid192(Urid256 src)
+		{
+			var v = src.Vec.KeepFirst(MaxLength);
+			return new Urid192(v.V0, v.V1, v.V2);
 		}
 	}
 
@@ -254,6 +294,9 @@ namespace URID
 
 		/// <inheritdoc cref="Urid64.ToString(bool, bool, char)"/>
 		public readonly string ToString(bool singleCase, bool upperCase, char separator = Base37.Separator) => Vec.Format(singleCase, upperCase, separator);
+
+		/// <inheritdoc cref="Urid64.Split"/>
+		public readonly UridSplitEnumerator Split(StringSplitOptions options = StringSplitOptions.None) => UridSplitEnumerator.Create(Vec, options);
 
 		/// <inheritdoc/>
 		public readonly bool Equals(Urid256 other) => v0 == other.v0 && v1 == other.v1 && v2 == other.v2 && v3 == other.v3;

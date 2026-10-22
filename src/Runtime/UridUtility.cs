@@ -76,6 +76,24 @@ namespace URID
 			return Base37.Decode(v.Div37() + 1);
 		}
 
+		/// <summary>Removes the last <paramref name="count"/> symbols.</summary>
+		/// <remarks>Dropping one symbol of a bijective numeral is <c>(v − 1) / 37</c>; no symbol is decoded.</remarks>
+		internal static TVec DropLast<TVec>(this TVec v, int count)
+			where TVec : struct, IVec
+		{
+			for (int i = 0; i < count && !v.IsZero; i++)
+			{
+				v.SubOne();
+				v.Div37();
+			}
+			return v;
+		}
+
+		/// <summary>Keeps the first <paramref name="count"/> symbols.</summary>
+		internal static TVec KeepFirst<TVec>(this TVec v, int count)
+			where TVec : struct, IVec
+			=> v.DropLast(v.GetLength() - count);
+
 		/// <inheritdoc cref="Urid64.ToString(bool, bool, char)"/>
 		internal static string Format<TVec>(this TVec v, bool singleCase, bool upperCase, char separator = Base37.Separator)
 			where TVec : struct, IVec

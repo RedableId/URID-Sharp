@@ -13,7 +13,7 @@ namespace URID
 	/// </para>
 	/// <para>
 	/// Converting is cheap while the symbols fit the target: the low words are copied as is.
-	/// Only truncation decodes the symbols and encodes the kept prefix again.
+	/// Truncation divides the extra trailing symbols off without decoding them.
 	/// </para>
 	/// </remarks>
 	public ref struct UridBuilder
@@ -81,9 +81,8 @@ namespace URID
 		{
 			const int cap = Urid64.MaxLength;
 			if (length <= cap) return new Urid64(v.V0);
-			Span<char> buf = stackalloc char[Urid256.MaxLength];
-			v.WriteChars(buf);
-			return new Urid64(buf.Slice(0, cap));
+			var t = v.DropLast(length - cap);
+			return new Urid64(t.V0);
 		}
 
 		/// <summary>Returns the first <see cref="Urid128.MaxLength"/> symbols as a <see cref="Urid128"/>.</summary>
@@ -91,9 +90,8 @@ namespace URID
 		{
 			const int cap = Urid128.MaxLength;
 			if (length <= cap) return new Urid128(v.V0, v.V1);
-			Span<char> buf = stackalloc char[Urid256.MaxLength];
-			v.WriteChars(buf);
-			return new Urid128(buf.Slice(0, cap));
+			var t = v.DropLast(length - cap);
+			return new Urid128(t.V0, t.V1);
 		}
 
 		/// <summary>Returns the first <see cref="Urid192.MaxLength"/> symbols as a <see cref="Urid192"/>.</summary>
@@ -101,9 +99,8 @@ namespace URID
 		{
 			const int cap = Urid192.MaxLength;
 			if (length <= cap) return new Urid192(v.V0, v.V1, v.V2);
-			Span<char> buf = stackalloc char[Urid256.MaxLength];
-			v.WriteChars(buf);
-			return new Urid192(buf.Slice(0, cap));
+			var t = v.DropLast(length - cap);
+			return new Urid192(t.V0, t.V1, t.V2);
 		}
 
 		/// <summary>Returns all symbols as a <see cref="Urid256"/>, which always has room for them.</summary>
