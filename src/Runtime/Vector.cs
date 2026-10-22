@@ -166,7 +166,6 @@ namespace URID
 		{
 			ulong carry = addend;
 			Magic37.MulStep(ref V0, ref carry);
-			if (carry == 0) return;
 			Magic37.MulStep(ref V1, ref carry);
 		}
 	}
@@ -208,9 +207,7 @@ namespace URID
 		{
 			ulong carry = addend;
 			Magic37.MulStep(ref V0, ref carry);
-			if (carry == 0) return;
 			Magic37.MulStep(ref V1, ref carry);
-			if (carry == 0) return;
 			Magic37.MulStep(ref V2, ref carry);
 		}
 	}
@@ -255,11 +252,8 @@ namespace URID
 		{
 			ulong carry = addend;
 			Magic37.MulStep(ref V0, ref carry);
-			if (carry == 0) return;
 			Magic37.MulStep(ref V1, ref carry);
-			if (carry == 0) return;
 			Magic37.MulStep(ref V2, ref carry);
-			if (carry == 0) return;
 			Magic37.MulStep(ref V3, ref carry);
 		}
 	}
